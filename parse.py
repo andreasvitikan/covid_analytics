@@ -12,4 +12,10 @@ latest = json.loads(f.read())
 print("The JSON file imported for analysis was last updated on: ")
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(latest['lasUpdatedOn'])))
 
+currentDayStats = latest['currentDayStats']
+print("The total number of infected today is: ")
+print(currentDayStats['numberInfected'])
+print("The total number of deceased today is: ")
+print(currentDayStats['numberDeceased'])
+
 
