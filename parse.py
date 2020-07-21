@@ -4,7 +4,13 @@
 #download it and use that
 
 import json
+#from time import time, strftime
 import time
+from datetime import date
+import locale
+
+#set the locale to romanian
+locale.setlocale(locale.LC_ALL, "ro_RO.utf8")
 
 json_file_name = "date_21_iulie_la_13_00.json"
 f = open("data/" + json_file_name, "r")
