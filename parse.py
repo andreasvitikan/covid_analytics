@@ -7,10 +7,11 @@ import urllib.request
 
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
-last_date = datetime.datetime(2020, 4, 3)
+last_date_county = datetime.datetime(2020, 4, 3)
+last_date = datetime.datetime(2020, 3, 18)
 
 # Note: the first day recorded is 17-03-2020
-# Note: the first day with county information is 02-04-2020
+# Note: the first day with county information is 03-04-2020
 # Note: the countyInfectionsNumbers did NOT include the - key from the beginning
 
 if os.path.exists("data/latestData.json"):
@@ -67,8 +68,8 @@ writer.writerow(csvfile_header)
 # and the last day recorded in historicalData ("yesterday")
 # Block 2: The historicalData which is done integrally based on consecutive entries
 # in historicalData
-# Block 3: The numbers for the first day on record (2020-03-17) which are NOT correct
-# but are written in such a way that the totals obtained are correct
+# Block 3: Parsing the historicalData for the days in which county information
+# is not available but age information is
 
 # !-------!
 # |Block 1|
@@ -123,9 +124,14 @@ while current_day > last_date:
 			csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
 	
 	# Compute the countyInfectionsNumbers values
-	for key in latest['historicalData'][current_day_string]['countyInfectionsNumbers'].keys():
-		if key.find("-") == -1:
-			csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+	# These values are missing before April 3rd, so just pad the CSV file with 0's
+	if current_day > last_date_county:
+		for key in latest['historicalData'][current_day_string]['countyInfectionsNumbers'].keys():
+			if key.find("-") == -1:
+				csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+	else:
+		for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
+			csvfile_row.append(0)
 	
 	writer.writerow(csvfile_row)
 	
