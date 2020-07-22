@@ -131,7 +131,8 @@ while current_day > last_date:
 				csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
 	else:
 		for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
-			csvfile_row.append(0)
+			if key.find("-") == -1:
+				csvfile_row.append(0)
 	
 	writer.writerow(csvfile_row)
 	
@@ -140,6 +141,8 @@ while current_day > last_date:
 # !-------!
 # |Block 3|
 # !-------!
+
+# Block 3 handles exclusively the last day in the historicalData set
 csvfile_row = []
 current_day_string = current_day.strftime(date_format)
 csvfile_row.append(current_day_string)
@@ -150,7 +153,8 @@ for key in latest['historicalData'][current_day_string]['distributionByAge'].key
 		csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key])
 else:
 	for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
-		csvfile_row.append(0)
+		if key.find("-") == -1:
+			csvfile_row.append(0)
 writer.writerow(csvfile_row)
 
 csvfile.close()
