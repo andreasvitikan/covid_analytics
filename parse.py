@@ -1,6 +1,16 @@
+import sys
+import os
+csv_flag = 0
+if len(sys.argv) > 1:
+	if sys.argv[1] == "-csv":
+		csv_flag = 1
+
 import json
-f = open("data/latestData.json", "r")
-latest = json.loads(f.read())
+if os.path.exists("data/latestData.json"):
+	f = open("data/latestData.json", "r")
+	latest = json.loads(f.read())
+else:
+	sys.exit("Nu există fișierul latestData.json!")
 
 import datetime
 latest_timestamp = datetime.datetime.fromtimestamp(latest['lasUpdatedOn'])
@@ -9,7 +19,6 @@ day = datetime.timedelta(days = 1)
 
 delta = datetime.datetime.now() - latest_timestamp
 if delta.seconds > 24*60*60:
-	import os
 	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(latest['lasUpdatedOn']))
 	import urllib.request
 	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "./latestData.json")
