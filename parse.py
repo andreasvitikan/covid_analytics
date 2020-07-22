@@ -7,6 +7,7 @@ import urllib.request
 
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
+last_date = datetime.datetime(2020, 4, 3)
 
 # Note: the first day recorded is 17-03-2020
 # Note: the first day with county information is 02-04-2020
@@ -95,5 +96,39 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 
 # Write the first row of values (second real row) to csv file
 writer.writerow(csvfile_row)
+
+# !-------!
+# |Block 2|
+# !-------!
+csvfile_row = []
+
+# This iterates through all the days in historicalData
+current_day = latest_timestamp - day
+while current_day > last_date:
+	csvfile_row = []
+	current_day_string = current_day.strftime(date_format)
+	previous_day_string = (current_day - day).strftime(date_format)
+	# This while loop steps through all of the day keys in historicalData
+	# There will be 3 subsections in this while loop, keeping the structure of Block 1
+	# First, writing the current date
+	csvfile_row.append(current_day.strftime(date_format))
+	
+	# Then, write the root values (3 keys)
+	for key in root_values:
+		csvfile_row.append(latest['historicalData'][current_day_string][key] - latest['historicalData'][previous_day_string][key])
+	
+	# Compute the distributionByAge values
+	for key in latest['historicalData'][current_day_string]['distributionByAge'].keys():
+		if key.find("procesare") == -1:
+			csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
+	
+	# Compute the countyInfectionsNumbers values
+	for key in latest['historicalData'][current_day_string]['countyInfectionsNumbers'].keys():
+		if key.find("-") == -1:
+			csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+	
+	writer.writerow(csvfile_row)
+	
+	current_day = current_day - day
 
 csvfile.close()
