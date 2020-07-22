@@ -1,7 +1,10 @@
 import sys
 import os
-
 import json
+import csv
+import datetime
+import urllib.request
+
 if os.path.exists("data/latestData.json"):
 	f = open("data/latestData.json", "r")
 	latest = json.loads(f.read())
@@ -9,7 +12,6 @@ if os.path.exists("data/latestData.json"):
 else:
 	sys.exit("Nu există fișierul latestData.json!")
 
-import datetime
 latest_timestamp = datetime.datetime.fromtimestamp(latest['lasUpdatedOn'])
 start_date = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
 day = datetime.timedelta(days = 1)
@@ -17,7 +19,6 @@ day = datetime.timedelta(days = 1)
 delta = datetime.datetime.now() - latest_timestamp
 if delta > day:
 	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(start_date.strftime("%Y-%m-%d")))
-	import urllib.request
 	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
 	print("Fișierul JSON vechi a fost redenumit, iar cel nou a fost descărcat! Rulați programul din nou!")
 else:
@@ -41,11 +42,15 @@ deceased_last = currentDayStats['numberDeceased'] - latest['historicalData'][yes
 print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(start_date.strftime("%Y-%m-%d"), infected_last, deceased_last, cured_last))
 
 import csv
-with open('data/latestData.csv', 'w', newline='') as csvfile:
-	writer = csv.writer(csvfile)
-	writer.writerow(['date', 'confirmed', 'deceased', 'cured'])
-	writer.writerow([start_date.strftime("%Y-%m-%d"), infected_last, deceased_last, cured_last])
-	csvfile.close()
+csvfile = open('data/latestData.csv', 'w', newline='')
+writer = csv.writer(csvfile)
+
+# This is the header for the exported CSV file (serves as header when importing the CSV into other programs)
+# This is NOT the optimal place/way to do it - will fix this later
+writer.writerow(['date', 'confirmed', 'deceased', 'cured'])
+
+# Write today's data into the CSV file (it is stored separately in the JSON as currentDayStats
+writer.writerow([start_date.strftime("%Y-%m-%d"), infected_last, deceased_last, cured_last])
 
 # This iterates day by day through historicalData
 # and generates the numbers for each day except for
@@ -54,27 +59,25 @@ date_a = datetime.date.fromtimestamp(latest['lasUpdatedOn']) - day
 date_b = date_a - day
 end_date = datetime.date(2020, 3, 17)
 
+
+while date_a > end_date:
+	date_a_string = date_a.strftime("%Y-%m-%d")
+	date_b_string = date_b.strftime("%Y-%m-%d")
+	infected = latest['historicalData'][date_a_string]['numberInfected'] - latest['historicalData'][date_b_string]['numberInfected']
+	deceased = latest['historicalData'][date_a_string]['numberDeceased'] - latest['historicalData'][date_b_string]['numberDeceased']
+	cured = latest['historicalData'][date_a_string]['numberCured'] - latest['historicalData'][date_b_string]['numberCured']
+	print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(date_a_string, infected, deceased, cured))
 	
-with open('data/latestData.csv', 'a', newline='') as csvfile:
-	writer = csv.writer(csvfile)
-	while date_a > end_date:
-		date_a_string = date_a.strftime("%Y-%m-%d")
-		date_b_string = date_b.strftime("%Y-%m-%d")
-		infected = latest['historicalData'][date_a_string]['numberInfected'] - latest['historicalData'][date_b_string]['numberInfected']
-		deceased = latest['historicalData'][date_a_string]['numberDeceased'] - latest['historicalData'][date_b_string]['numberDeceased']
-		cured = latest['historicalData'][date_a_string]['numberCured'] - latest['historicalData'][date_b_string]['numberCured']
-		print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(date_a_string, infected, deceased, cured))
-		
-		writer.writerow([date_a_string, infected, deceased, cured])	
-		
-		date_a = date_a - day
-		date_b = date_b - day
+	writer.writerow([date_a_string, infected, deceased, cured])	
 	
-	infected = latest['historicalData'][date_b_string]['numberInfected']
-	deceased = latest['historicalData'][date_b_string]['numberDeceased']
-	cured = latest['historicalData'][date_b_string]['numberCured']
-	print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(date_b_string, infected, deceased, cured))
-	writer.writerow([date_b_string, infected, deceased, cured])
+	date_a = date_a - day
+	date_b = date_b - day
+
+infected = latest['historicalData'][date_b_string]['numberInfected']
+deceased = latest['historicalData'][date_b_string]['numberDeceased']
+cured = latest['historicalData'][date_b_string]['numberCured']
+print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(date_b_string, infected, deceased, cured))
+writer.writerow([date_b_string, infected, deceased, cured])
 
 print()
 print("Gata!")
