@@ -41,6 +41,12 @@ cured_last = currentDayStats['numberCured'] - latest['historicalData'][yesterday
 deceased_last = currentDayStats['numberDeceased'] - latest['historicalData'][yesterday_string]['numberDeceased']
 print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(start_date.strftime("%Y-%m-%d"), infected_last, deceased_last, cured_last))
 
+print("Situația pe județe")
+for key in latest['historicalData'][yesterday_string]['countyInfectionsNumbers'].keys():
+	value = currentDayStats['countyInfectionsNumbers'][key] - latest['historicalData'][yesterday_string]['countyInfectionsNumbers'][key]
+	print("Județul {} confirmați {}".format(key, value))
+
+
 import csv
 csvfile = open('data/latestData.csv', 'w', newline='')
 writer = csv.writer(csvfile)
