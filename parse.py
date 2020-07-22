@@ -5,6 +5,7 @@ import json
 if os.path.exists("data/latestData.json"):
 	f = open("data/latestData.json", "r")
 	latest = json.loads(f.read())
+	f.close()
 else:
 	sys.exit("Nu există fișierul latestData.json!")
 
@@ -14,10 +15,10 @@ start_date = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
 day = datetime.timedelta(days = 1)
 
 delta = datetime.datetime.now() - latest_timestamp
-if delta.seconds > 24*60*60:
+if delta > day:
 	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(start_date.strftime("%Y-%m-%d")))
 	import urllib.request
-	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "./latestData.json")
+	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
 	print("Fișierul JSON vechi a fost redenumit, iar cel nou a fost descărcat! Rulați programul din nou!")
 else:
 	print("Fișierul JSON este în regulă!")
