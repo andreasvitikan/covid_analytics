@@ -40,7 +40,7 @@ deceased_last = currentDayStats['numberDeceased'] - latest['historicalData'][yes
 print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(start_date.strftime("%Y-%m-%d"), infected_last, deceased_last, cured_last))
 
 import csv
-with open('latestData.csv', 'w', newline='') as csvfile:
+with open('data/latestData.csv', 'w', newline='') as csvfile:
 	writer = csv.writer(csvfile)
 	writer.writerow(['date', 'confirmed', 'deceased', 'cured'])
 	writer.writerow([start_date.strftime("%Y-%m-%d"), infected_last, deceased_last, cured_last])
@@ -54,7 +54,7 @@ date_b = date_a - day
 end_date = datetime.date(2020, 3, 17)
 
 	
-with open('latestData.csv', 'a', newline='') as csvfile:
+with open('data/latestData.csv', 'a', newline='') as csvfile:
 	writer = csv.writer(csvfile)
 	while date_a > end_date:
 		date_a_string = date_a.strftime("%Y-%m-%d")
@@ -68,3 +68,13 @@ with open('latestData.csv', 'a', newline='') as csvfile:
 		
 		date_a = date_a - day
 		date_b = date_b - day
+	
+	infected = latest['historicalData'][date_b_string]['numberInfected']
+	deceased = latest['historicalData'][date_b_string]['numberDeceased']
+	cured = latest['historicalData'][date_b_string]['numberCured']
+	print("{} \tconfirmați \t{} \tdecedați \t{} \tvindecați \t{}".format(date_b_string, infected, deceased, cured))
+	writer.writerow([date_b_string, infected, deceased, cured])
+
+print()
+print("Gata!")
+
