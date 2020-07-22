@@ -68,8 +68,8 @@ writer.writerow(csvfile_header)
 # and the last day recorded in historicalData ("yesterday")
 # Block 2: The historicalData which is done integrally based on consecutive entries
 # in historicalData
-# Block 3: Parsing the historicalData for the days in which county information
-# is not available but age information is
+# Block 3: Padding the last day in historicalData with wrong values so that the totals
+# are correct when summed to the present day
 
 # !-------!
 # |Block 1|
@@ -137,4 +137,21 @@ while current_day > last_date:
 	
 	current_day = current_day - day
 
+# !-------!
+# |Block 3|
+# !-------!
+csvfile_row = []
+current_day_string = current_day.strftime(date_format)
+csvfile_row.append(current_day_string)
+for key in root_values:
+	csvfile_row.append(latest['historicalData'][current_day_string][key])
+for key in latest['historicalData'][current_day_string]['distributionByAge'].keys():
+	if key.find("procesare") == -1:
+		csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key])
+else:
+	for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
+		csvfile_row.append(0)
+writer.writerow(csvfile_row)
+
 csvfile.close()
+
