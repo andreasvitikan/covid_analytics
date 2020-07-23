@@ -7,8 +7,8 @@ import urllib.request
 
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
-last_date_county = datetime.datetime(2020, 4, 3)
-last_date = datetime.datetime(2020, 3, 18)
+last_date_county = datetime.date(2020, 4, 3)
+last_date = datetime.date(2020, 3, 18)
 
 # Note: the first day recorded is 17-03-2020
 # Note: the first day with county information is 03-04-2020
@@ -27,26 +27,19 @@ else:
 # day is a datetime interval representing 1 day (24 hours) that is frequently used
 
 latest_timestamp_string = latest['lasUpdatedOn']
-latest_timestamp = datetime.datetime.fromtimestamp(latest['lasUpdatedOn'])
+latest_timestamp = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
 day = datetime.timedelta(days = 1)
 
 
 # if the timestamp associated with the JSON file is older than 1 day - redownload the JSON file and exit
 # ToDo: do a head request at datelazi.ro/latestData.json and check the Last-Modified header
 
-delta = datetime.datetime.now() - latest_timestamp
-if delta > day:
-	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(start_date.strftime("%Y-%m-%d")))
-	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
-	sys.exit("Fișierul JSON vechi a fost redenumit, iar cel nou a fost descărcat! Rulați programul din nou!")
-else:
-	print("Fișierul JSON este în regulă!")
-
 # Generating the file header with all of the column names
 # The first 4 columns are hard-coded, the date is the key for the historicalData in the JSON file
 # And the numberInfected, numberCured and numberDeceased fields share the same name with the JSON file
 
-csvfile_header = ['date']
+# Adding date number field to csvfile_header
+csvfile_header = ['dayNumber', 'date']
 for key in root_values:
 	csvfile_header.append(key)
 
@@ -82,6 +75,7 @@ csvfile_row = {}
 
 # Add the date for the last day on record
 #csvfile_row.append(latest_timestamp.strftime(date_format))
+csvfile_row['dayNumber'] = (latest_timestamp - last_date).days + 1
 csvfile_row['date'] = latest_timestamp.strftime(date_format)
 
 # Compute the 3 root values for the last day on record and add them
@@ -121,6 +115,7 @@ while current_day > last_date:
 	# There will be 3 subsections in this while loop, keeping the structure of Block 1
 	# First, writing the current date
 	#csvfile_row.append(current_day.strftime(date_format))
+	csvfile_row['dayNumber'] = (current_day - last_date).days + 1
 	csvfile_row['date'] = current_day.strftime(date_format)
 	
 	# Then, write the root values (3 keys)
@@ -160,6 +155,7 @@ while current_day > last_date:
 csvfile_row = {}
 current_day_string = current_day.strftime(date_format)
 #csvfile_row.append(current_day_string)
+csvfile_row['dayNumber'] = (current_day - last_date).days + 1
 csvfile_row['date'] = current_day_string
 
 for key in root_values:
