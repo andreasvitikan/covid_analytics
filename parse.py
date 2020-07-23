@@ -8,7 +8,7 @@ import urllib.request
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
 last_date_county = datetime.date(2020, 4, 3)
-last_date = datetime.date(2020, 3, 18)
+last_date = datetime.date(2020, 3, 17)
 
 # Note: the first day recorded is 17-03-2020
 # Note: the first day with county information is 03-04-2020
@@ -111,6 +111,10 @@ while current_day > last_date:
 	csvfile_row = {}
 	current_day_string = current_day.strftime(date_format)
 	previous_day_string = (current_day - day).strftime(date_format)
+	
+	# Debug line - printf debugging - remove once OK
+	print("In while loop, iteration {}".format(current_day_string))
+	
 	# This while loop steps through all of the day keys in historicalData
 	# There will be 3 subsections in this while loop, keeping the structure of Block 1
 	# First, writing the current date
