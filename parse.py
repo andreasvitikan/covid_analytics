@@ -1,3 +1,5 @@
+#! python
+
 import sys
 import os
 import json
@@ -11,13 +13,16 @@ import requests
 real_path = os.path.realpath(__file__)
 os.chdir(real_path[:real_path.index("parse.py")])
 
+# The URL for the datelazi.ro JSON file
+url_json = "https://datelazi.ro/latestData.json"
+
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
 last_date_county = datetime.date(2020, 4, 3)
 last_date = datetime.date(2020, 3, 17)
 last_modified = ""
 
-http_response = requests.head("https://datelazi.ro/latestData.json")
+http_response = requests.head(url_json)
 
 # Note: the first day recorded is 17-03-2020
 # Note: the first day with county information is 03-04-2020
@@ -32,7 +37,7 @@ if not (os.path.exists("data/latestData.json") and os.path.exists("data/Last-Mod
 	print("Nu există fișierul latestData.json sau fișierul Last-Modified.head !")
 	# Thanks https://github.com/mcmarius/
 	os.makedirs("data/", exist_ok = True)
-	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
+	urllib.request.urlretrieve(url_json, "data/latestData.json")
 	with open('data/Last-Modified.head', 'w') as f:
 		f.write(http_response.headers['Last-Modified'])
 
@@ -48,7 +53,7 @@ if last_modified == http_response.headers['Last-Modified']:
 	print("Fișierul JSON este ultima variantă!")
 else:
 	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(datetime.date.today().strftime("%Y-%m-%d")))
-	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
+	urllib.request.urlretrieve(url_json, "data/latestData.json")
 	with open('data/Last-Modified.head', 'w') as f:
 		f.write(http_response.headers['Last-Modified'])
 
