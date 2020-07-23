@@ -22,25 +22,42 @@ http_response = requests.head("https://datelazi.ro/latestData.json")
 # Note: the first day recorded is 17-03-2020
 # Note: the first day with county information is 03-04-2020
 # Note: the countyInfectionsNumbers did NOT include the - key from the beginning
+# Note: nor did the distributionByAge contain the wonderful "in procesare" key with the mis-rendering...
 
-if os.path.exists("data/latestData.json") and os.path.exists("data/Last-Modified.head"):
-	f = open("data/latestData.json", "r")
-	latest = json.loads(f.read())
-	f.close()
-	f = open("data/Last-Modified.head", "r")
-	last_modified = f.read()
-	f.close()
-else:
+# This is in case either the data directory, the data/latestData.json or the data/Last-Modified.head
+# files do not exist. This will create the timestamp file, download the latest JSON and create
+# the directory if necessary.
+
+if not (os.path.exists("data/latestData.json") and os.path.exists("data/Last-Modified.head")):
 	print("Nu există fișierul latestData.json sau fișierul Last-Modified.head !")
-	if not os.path.exists("data/"):
-		os.mkdir("data")
+	# Thanks https://github.com/mcmarius/
+	os.makedirs("data/", exist_ok = True)
 	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
 	with open('data/Last-Modified.head', 'w') as f:
 		f.write(http_response.headers['Last-Modified'])
-		f.close()
-	#sys.exit("Fișierele latestData.json și Last-Modified.head au fost generate! Vă rugăm rulați programul din nou!")
-	print("Scriptul se va restarta acum!")
-	os.execl(sys.executable, sys.executable, os.path.realpath(__file__))
+
+# Once we are sure that files exist, it's time to check the timestamp
+# if the files stored locally are the right version.
+# if the locally stored timestamp of the JSON file does not match the timestamp
+# return by the HEAD request via the Last-Modified field, redownload the JSON file
+
+with open('data/Last-Modified.head', 'r') as f:
+	last_modified = f.read()
+
+if last_modified == http_response.headers['Last-Modified']:
+	print("Fișierul JSON este ultima variantă!")
+else:
+	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(datetime.date.today().strftime("%Y-%m-%d")))
+	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
+	with open('data/Last-Modified.head', 'w') as f:
+		f.write(http_response.headers['Last-Modified'])
+
+# At this point, the latestData.json file definitely exists
+# and is definitely the right version!
+# The Narrator is thankful there are no more restarts...
+
+with open('data/latestData.json', 'r') as f:
+	latest = json.loads(f.read())
 
 # latest is the json structure read from the latestData.json
 # latest_timestamp is a datetime object representing when the imported JSON was last updated
@@ -51,24 +68,11 @@ latest_timestamp_string = latest['lasUpdatedOn']
 latest_timestamp = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
 day = datetime.timedelta(days = 1)
 
-
-# if the locally stored timestamp of the JSON file does not match the timestamp
-# return by the HEAD request via the Last-Modified field, redownload the JSON file and exit
-if last_modified == http_response.headers['Last-Modified']:
-	print("Fișierul JSON este ultima variantă!")
-else:
-	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(datetime.date.today().strftime("%Y-%m-%d")))
-	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
-	with open('data/Last-Modified.head', 'w') as f:
-		f.write(http_response.headers['Last-Modified'])
-		f.close()
-	sys.exit("Fișierul JSON vechi a fost redenumit, iar cel nou a fost descărcat! Rulați programul din nou!")
-
 # Generating the file header with all of the column names
 # The first 4 columns are hard-coded, the date is the key for the historicalData in the JSON file
 # And the numberInfected, numberCured and numberDeceased fields share the same name with the JSON file
 
-# Adding date number field to csvfile_header
+# Generate the CSV header
 csvfile_header = ['dayNumber', 'date']
 for key in root_values:
 	csvfile_header.append(key)
@@ -81,10 +85,9 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
 		csvfile_header.append("county{}".format(key))
 
-# Modifying block to switch to csv.DictWriter
+# Begin writing CSV file
 csvfile = open("data/latestData.csv", 'w', newline='')
 writer = csv.DictWriter(csvfile, csvfile_header)
-#writer.writerow(csvfile_header)
 writer.writeheader()
 
 # Time to generate the actual values to be written in the CSV file
@@ -100,11 +103,9 @@ writer.writeheader()
 # |Block 1|
 # !-------!
 
-#csvfile_row = []
 csvfile_row = {}
 
 # Add the date for the last day on record
-#csvfile_row.append(latest_timestamp.strftime(date_format))
 csvfile_row['dayNumber'] = (latest_timestamp - last_date).days + 1
 csvfile_row['date'] = latest_timestamp.strftime(date_format)
 
@@ -112,19 +113,16 @@ csvfile_row['date'] = latest_timestamp.strftime(date_format)
 previous_day = latest_timestamp - day
 previous_day_string = previous_day.strftime(date_format)
 for key in root_values:
-	#csvfile_row.append(latest['currentDayStats'][key] - latest['historicalData'][previous_day_string][key])
 	csvfile_row[key] = latest['currentDayStats'][key] - latest['historicalData'][previous_day_string][key]
 
 # Compute the distributionByAge values
 for key in latest['currentDayStats']['distributionByAge'].keys():
 	if key.find("procesare") == -1:
-		#csvfile_row.append(latest['currentDayStats']['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
 		csvfile_row['age{}'.format(key)] = latest['currentDayStats']['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key]
 
 # Compute the countyInfectionsNumbers values
 for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
-		#csvfile_row.append(latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
 		csvfile_row['county{}'.format(key)] = latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key]
 
 # Write the first row of values (second real row) to csv file
@@ -142,9 +140,6 @@ while current_day > last_date:
 	current_day_string = current_day.strftime(date_format)
 	previous_day_string = (current_day - day).strftime(date_format)
 	
-	# Debug line - printf debugging - remove once OK
-	#print("In while loop, iteration {}".format(current_day_string))
-	
 	# This while loop steps through all of the day keys in historicalData
 	# There will be 3 subsections in this while loop, keeping the structure of Block 1
 	# First, writing the current date
@@ -154,13 +149,11 @@ while current_day > last_date:
 	
 	# Then, write the root values (3 keys)
 	for key in root_values:
-		#csvfile_row.append(latest['historicalData'][current_day_string][key] - latest['historicalData'][previous_day_string][key])
 		csvfile_row[key] = latest['historicalData'][current_day_string][key] - latest['historicalData'][previous_day_string][key]
 	
 	# Compute the distributionByAge values
 	for key in latest['historicalData'][current_day_string]['distributionByAge'].keys():
 		if key.find("procesare") == -1:
-			#csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
 			csvfile_row["age{}".format(key)] = latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key]
 	
 	# Compute the countyInfectionsNumbers values
@@ -168,12 +161,10 @@ while current_day > last_date:
 	if current_day > last_date_county:
 		for key in latest['historicalData'][current_day_string]['countyInfectionsNumbers'].keys():
 			if key.find("-") == -1:
-				#csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
 				csvfile_row["county{}".format(key)] = latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key]
 	else:
 		for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 			if key.find("-") == -1:
-				#csvfile_row.append(0)
 				csvfile_row["county{}".format(key)] = 0
 	
 	writer.writerow(csvfile_row)
@@ -185,20 +176,18 @@ while current_day > last_date:
 # !-------!
 
 # Block 3 handles exclusively the last day in the historicalData set
-#csvfile_row = []
+
 csvfile_row = {}
+
 current_day_string = current_day.strftime(date_format)
-#csvfile_row.append(current_day_string)
 csvfile_row['dayNumber'] = (current_day - last_date).days + 1
 csvfile_row['date'] = current_day_string
 
 for key in root_values:
-	#csvfile_row.append(latest['historicalData'][current_day_string][key])
 	csvfile_row[key] = latest['historicalData'][current_day_string][key]
 
 for key in latest['historicalData'][current_day_string]['distributionByAge'].keys():
 	if key.find("procesare") == -1:
-		#csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key])
 		csvfile_row["age{}".format(key)] = latest['historicalData'][current_day_string]['distributionByAge'][key]
 
 for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
