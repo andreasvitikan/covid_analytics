@@ -23,3 +23,12 @@ in cases for the day, it is the total cases up to that day, so the total number 
 
 2. For data before **2020-04-03** (April 3rd, 2020), where countyInfectionsNumbers are not available, the values for the county columns
 are padded with 0 in order to keep the number of values per row constant. 
+
+Miscellaneous information
+-------------------------
+
+* **GCS** = Grupul de Comunicare Strategică
+* 2020-02-26 (February 2nd, 2020) was the day with the first confirmed case of COVID-19 in Romania.
+* The epidemiological data is available via the official JSON with a historical record that dates back to March 17th.
+* Another indicator that is tracked and that is available on the [GCS](https://stirioficiale.ro/informatii) website is the number of positive asymptomatic discharged patients. This indicator is not available via the JSON interface.
+
