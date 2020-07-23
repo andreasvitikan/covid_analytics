@@ -32,3 +32,6 @@ Miscellaneous information
 * The epidemiological data is available via the official JSON with a historical record that dates back to March 17th.
 * Another indicator that is tracked and that is available on the [GCS](https://stirioficiale.ro/informatii) website is the number of positive asymptomatic discharged patients. This indicator is not available via the JSON interface.
 
+# ⚠️ Work in progress ⚠️
+The `plotter.py` is a work in progress and is NOT meant to be used!
+This file requires that the **matplotlib** module be installed.
