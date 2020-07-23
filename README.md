@@ -1,5 +1,4 @@
-COVID-19 GCS (România) data scraper and parser
-==============================================
+# COVID-19 GCS (România) data scraper and parser
 
 This is a Python script that scrapes the latest official data regarding the **COVID-19** pandemic in [Romania](https://stirioficiale.ro/informatii)
 from the [datelazi.ro](https://datelazi.ro) website via the JSON interface. The script computes the daily changes
@@ -18,11 +17,9 @@ In this numbering scheme March 17th is `dayNumber` 1, March 18th is `dayNumber` 
 
 #### How to use
 
-If the script is run for the first time, it will generate the data directory and download the `latestData.json` file
-and generate the timestamp `Last-Modified.head` file. The script will then restart itself and generate the CSV file.
-
-Otherwise the script will simply read the JSON file, it will update it as necessary, and it will generate the
-`latestData.csv` output file located in the data directory, overwriting any existing `latestData.csv` file.
+**Simply run the python script.** If the requisite files and folders are not present, they will be automatically created
+and if the local JSON file is out-of-date it will be automatically updated by the script. The output data will be
+placed in the `data/latestData.csv` file.
 
 #### Known issues
 
@@ -33,8 +30,7 @@ in cases for the day, it is the total cases up to that day, so the total number 
 2. For data before **2020-04-03** (April 3rd, 2020), where countyInfectionsNumbers are not available, the values for the county columns
 are padded with 0 in order to keep the number of values per row constant. 
 
-Miscellaneous information
--------------------------
+##### Miscellaneous information
 
 * **GCS** = Grupul de Comunicare Strategică
 * 2020-02-26 (February 2nd, 2020) was the day with the first confirmed case of COVID-19 in Romania.
