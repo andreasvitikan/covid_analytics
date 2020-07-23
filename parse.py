@@ -6,10 +6,14 @@ import datetime
 import urllib.request
 import requests
 
+real_path = os.path.realpath(__file__)
+os.chdir(real_path[:real_path.index("parse.py")])
+
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
 last_date_county = datetime.date(2020, 4, 3)
 last_date = datetime.date(2020, 3, 17)
+last_modified = ""
 
 http_response = requests.head("https://datelazi.ro/latestData.json")
 
@@ -32,7 +36,9 @@ else:
 	with open('data/Last-Modified.head', 'w') as f:
 		f.write(http_response.headers['Last-Modified'])
 		f.close()
-	sys.exit("Fișierele latestData.json și Last-Modified.head au fost generate! Vă rugăm rulați programul din nou!")
+	#sys.exit("Fișierele latestData.json și Last-Modified.head au fost generate! Vă rugăm rulați programul din nou!")
+	print("Scriptul se va restarta acum! cu {} {}".format(sys.executable, os.path.realpath(__file__)))
+	os.execl(sys.executable, sys.executable, os.path.realpath(__file__))
 
 # latest is the json structure read from the latestData.json
 # latest_timestamp is a datetime object representing when the imported JSON was last updated
