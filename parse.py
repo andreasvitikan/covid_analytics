@@ -4,6 +4,7 @@ import json
 import csv
 import datetime
 import urllib.request
+import requests
 
 date_format = "%Y-%m-%d"
 root_values = ['numberInfected', 'numberCured', 'numberDeceased']
@@ -14,12 +15,15 @@ last_date = datetime.date(2020, 3, 17)
 # Note: the first day with county information is 03-04-2020
 # Note: the countyInfectionsNumbers did NOT include the - key from the beginning
 
-if os.path.exists("data/latestData.json"):
+if os.path.exists("data/latestData.json") and os.path.exists("data/Last-Modified.head"):
 	f = open("data/latestData.json", "r")
 	latest = json.loads(f.read())
 	f.close()
+	f = open("data/Last-Modified.head", "r")
+	last_modified = f.read()
+	f.close()
 else:
-	sys.exit("Nu există fișierul latestData.json!")
+	sys.exit("Nu există fișierul latestData.json sau fișierul Last-Modified.head !")
 
 # latest is the json structure read from the latestData.json
 # latest_timestamp is a datetime object representing when the imported JSON was last updated
@@ -33,6 +37,17 @@ day = datetime.timedelta(days = 1)
 
 # if the timestamp associated with the JSON file is older than 1 day - redownload the JSON file and exit
 # ToDo: do a head request at datelazi.ro/latestData.json and check the Last-Modified header
+
+http_response = requests.head("https://datelazi.ro/latestData.json")
+if last_modified == http_response.headers['Last-Modified']:
+	print("Fișierul JSON este ultima variantă!")
+else:
+	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(datetime.date.today().strftime("%Y-%m-%d")))
+	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
+	with open('data/Last-Modified.head', 'w') as f:
+		f.write(http_response.headers['Last-Modified'])
+		f.close()
+	sys.exit("Fișierul JSON vechi a fost redenumit, iar cel nou a fost descărcat! Rulați programul din nou!")
 
 # Generating the file header with all of the column names
 # The first 4 columns are hard-coded, the date is the key for the historicalData in the JSON file
@@ -113,7 +128,7 @@ while current_day > last_date:
 	previous_day_string = (current_day - day).strftime(date_format)
 	
 	# Debug line - printf debugging - remove once OK
-	print("In while loop, iteration {}".format(current_day_string))
+	#print("In while loop, iteration {}".format(current_day_string))
 	
 	# This while loop steps through all of the day keys in historicalData
 	# There will be 3 subsections in this while loop, keeping the structure of Block 1
