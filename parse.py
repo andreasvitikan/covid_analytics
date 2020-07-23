@@ -66,10 +66,8 @@ with open('data/latestData.json', 'r') as f:
 
 # latest is the json structure read from the latestData.json
 # latest_timestamp is a datetime object representing when the imported JSON was last updated
-# latest_timestamp_string is a string that contains the POSIX epoch time when the JSON was last updated
 # day is a datetime interval representing 1 day (24 hours) that is frequently used
 
-latest_timestamp_string = latest['lasUpdatedOn']
 latest_timestamp = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
 day = datetime.timedelta(days = 1)
 
