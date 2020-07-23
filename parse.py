@@ -6,6 +6,8 @@ import datetime
 import urllib.request
 import requests
 
+# Correct setting of the working directory in case the script
+# is not called from the directory where it is located
 real_path = os.path.realpath(__file__)
 os.chdir(real_path[:real_path.index("parse.py")])
 
@@ -37,7 +39,7 @@ else:
 		f.write(http_response.headers['Last-Modified'])
 		f.close()
 	#sys.exit("Fișierele latestData.json și Last-Modified.head au fost generate! Vă rugăm rulați programul din nou!")
-	print("Scriptul se va restarta acum! cu {} {}".format(sys.executable, os.path.realpath(__file__)))
+	print("Scriptul se va restarta acum!")
 	os.execl(sys.executable, sys.executable, os.path.realpath(__file__))
 
 # latest is the json structure read from the latestData.json
