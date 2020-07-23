@@ -16,6 +16,14 @@ namely: `YYYY-mm-dd` or `%Y-%m-%d` (for `strftime()`). The dayNumber column was 
 and is the 1-based day index **since** the historical record (March 17th!, *not the first day of the pandemic in România*).
 In this numbering scheme March 17th is `dayNumber` 1, March 18th is `dayNumber` 2 and so on.
 
+#### How to use
+
+If the script is run for the first time, it will generate the data directory and download the `latestData.json` file
+and generate the timestamp `Last-Modified.head` file. The script will then exit and tell you to run it again.
+
+Otherwise the script will simply read the JSON file, it will update it as necessary, and it will generate the
+`latestData.csv` output file located in the data directory, overwriting any existing `latestData.csv` file.
+
 #### Known issues
 
 1. The number of confirmed cases for the start date of the data (17-03-2020) is **NOT** the daily changes
