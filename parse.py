@@ -58,9 +58,11 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
 		csvfile_header.append("county{}".format(key))
 
+# Modifying block to switch to csv.DictWriter
 csvfile = open("data/latestData.csv", 'w', newline='')
-writer = csv.writer(csvfile)
-writer.writerow(csvfile_header)
+writer = csv.DictWriter(csvfile, csvfile_header)
+#writer.writerow(csvfile_header)
+writer.writeheader()
 
 # Time to generate the actual values to be written in the CSV file
 # These will be generated in 3 blocks:
@@ -158,6 +160,3 @@ else:
 writer.writerow(csvfile_row)
 
 csvfile.close()
-
-# this is some stuff that I added to the end
-# in the DictWriter branch
