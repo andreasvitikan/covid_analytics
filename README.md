@@ -12,10 +12,11 @@ are prefixed with **age**: `age0-9, age9-19`, etc. and the **county** numbers ar
 *county*: `countyAB, countyAR`, etc.) and with the subsequent rows containing the computed data.
 
 The dates, as exported in the CSV file, are formatted in the same way as in the original JSON file,
-namely: `YYYY-mm-dd` or `%Y-%m-%d` (for `strftime()`).
+namely: `YYYY-mm-dd` or `%Y-%m-%d` (for `strftime()`). The dayNumber column was added in a later commit
+and is the 1-based day index **since** the historical record (March 17th!, *not the first day of the pandemic in România*).
+In this numbering scheme March 17th is `dayNumber` 1, March 18th is `dayNumber` 2 and so on.
 
-Known issues
-------------
+#### Known issues
 
 1. The number of confirmed cases for the start date of the data (17-03-2020) is **NOT** the daily changes
 in cases for the day, it is the total cases up to that day, so the total number of confirmed cases is correct
