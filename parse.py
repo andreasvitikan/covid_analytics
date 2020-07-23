@@ -76,26 +76,32 @@ writer.writeheader()
 # !-------!
 # |Block 1|
 # !-------!
-csvfile_row = []
+
+#csvfile_row = []
+csvfile_row = {}
 
 # Add the date for the last day on record
-csvfile_row.append(latest_timestamp.strftime(date_format))
+#csvfile_row.append(latest_timestamp.strftime(date_format))
+csvfile_row['date'] = latest_timestamp.strftime(date_format)
 
 # Compute the 3 root values for the last day on record and add them
 previous_day = latest_timestamp - day
 previous_day_string = previous_day.strftime(date_format)
 for key in root_values:
-	csvfile_row.append(latest['currentDayStats'][key] - latest['historicalData'][previous_day_string][key])
+	#csvfile_row.append(latest['currentDayStats'][key] - latest['historicalData'][previous_day_string][key])
+	csvfile_row[key] = latest['currentDayStats'][key] - latest['historicalData'][previous_day_string][key]
 
 # Compute the distributionByAge values
 for key in latest['currentDayStats']['distributionByAge'].keys():
 	if key.find("procesare") == -1:
-		csvfile_row.append(latest['currentDayStats']['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
+		#csvfile_row.append(latest['currentDayStats']['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
+		csvfile_row['age{}'.format(key)] = latest['currentDayStats']['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key]
 
 # Compute the countyInfectionsNumbers values
 for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
-		csvfile_row.append(latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+		#csvfile_row.append(latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+		csvfile_row['county{}'.format(key)] = latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key]
 
 # Write the first row of values (second real row) to csv file
 writer.writerow(csvfile_row)
@@ -103,38 +109,43 @@ writer.writerow(csvfile_row)
 # !-------!
 # |Block 2|
 # !-------!
-csvfile_row = []
+csvfile_row = {}
 
 # This iterates through all the days in historicalData
 current_day = latest_timestamp - day
 while current_day > last_date:
-	csvfile_row = []
+	csvfile_row = {}
 	current_day_string = current_day.strftime(date_format)
 	previous_day_string = (current_day - day).strftime(date_format)
 	# This while loop steps through all of the day keys in historicalData
 	# There will be 3 subsections in this while loop, keeping the structure of Block 1
 	# First, writing the current date
-	csvfile_row.append(current_day.strftime(date_format))
+	#csvfile_row.append(current_day.strftime(date_format))
+	csvfile_row['date'] = current_day.strftime(date_format)
 	
 	# Then, write the root values (3 keys)
 	for key in root_values:
-		csvfile_row.append(latest['historicalData'][current_day_string][key] - latest['historicalData'][previous_day_string][key])
+		#csvfile_row.append(latest['historicalData'][current_day_string][key] - latest['historicalData'][previous_day_string][key])
+		csvfile_row[key] = latest['historicalData'][current_day_string][key] - latest['historicalData'][previous_day_string][key]
 	
 	# Compute the distributionByAge values
 	for key in latest['historicalData'][current_day_string]['distributionByAge'].keys():
 		if key.find("procesare") == -1:
-			csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
+			#csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key])
+			csvfile_row["age{}".format(key)] = latest['historicalData'][current_day_string]['distributionByAge'][key] - latest['historicalData'][previous_day_string]['distributionByAge'][key]
 	
 	# Compute the countyInfectionsNumbers values
 	# These values are missing before April 3rd, so just pad the CSV file with 0's
 	if current_day > last_date_county:
 		for key in latest['historicalData'][current_day_string]['countyInfectionsNumbers'].keys():
 			if key.find("-") == -1:
-				csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+				#csvfile_row.append(latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key])
+				csvfile_row["county{}".format(key)] = latest['historicalData'][current_day_string]['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key]
 	else:
 		for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 			if key.find("-") == -1:
-				csvfile_row.append(0)
+				#csvfile_row.append(0)
+				csvfile_row["county{}".format(key)] = 0
 	
 	writer.writerow(csvfile_row)
 	
@@ -145,18 +156,25 @@ while current_day > last_date:
 # !-------!
 
 # Block 3 handles exclusively the last day in the historicalData set
-csvfile_row = []
+#csvfile_row = []
+csvfile_row = {}
 current_day_string = current_day.strftime(date_format)
-csvfile_row.append(current_day_string)
+#csvfile_row.append(current_day_string)
+csvfile_row['date'] = current_day_string
+
 for key in root_values:
-	csvfile_row.append(latest['historicalData'][current_day_string][key])
+	#csvfile_row.append(latest['historicalData'][current_day_string][key])
+	csvfile_row[key] = latest['historicalData'][current_day_string][key]
+
 for key in latest['historicalData'][current_day_string]['distributionByAge'].keys():
 	if key.find("procesare") == -1:
-		csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key])
-else:
-	for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
-		if key.find("-") == -1:
-			csvfile_row.append(0)
+		#csvfile_row.append(latest['historicalData'][current_day_string]['distributionByAge'][key])
+		csvfile_row["age{}".format(key)] = latest['historicalData'][current_day_string]['distributionByAge'][key]
+
+for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
+	if key.find("-") == -1:
+		csvfile_row["county{}".format(key)] = 0
+
 writer.writerow(csvfile_row)
 
 csvfile.close()
