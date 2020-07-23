@@ -76,9 +76,7 @@ day = datetime.timedelta(days = 1)
 # And the numberInfected, numberCured and numberDeceased fields share the same name with the JSON file
 
 # Generate the CSV header
-csvfile_header = ['dayNumber', 'date']
-for key in root_values:
-	csvfile_header.append(key)
+csvfile_header = ['dayNumber', 'date'] + root_values
 
 for key in latest['currentDayStats']['distributionByAge'].keys():
 	if key.find("procesare") == -1:
