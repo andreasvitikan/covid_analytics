@@ -11,6 +11,8 @@ root_values = ['numberInfected', 'numberCured', 'numberDeceased']
 last_date_county = datetime.date(2020, 4, 3)
 last_date = datetime.date(2020, 3, 17)
 
+http_response = requests.head("https://datelazi.ro/latestData.json")
+
 # Note: the first day recorded is 17-03-2020
 # Note: the first day with county information is 03-04-2020
 # Note: the countyInfectionsNumbers did NOT include the - key from the beginning
@@ -23,7 +25,14 @@ if os.path.exists("data/latestData.json") and os.path.exists("data/Last-Modified
 	last_modified = f.read()
 	f.close()
 else:
-	sys.exit("Nu există fișierul latestData.json sau fișierul Last-Modified.head !")
+	print("Nu există fișierul latestData.json sau fișierul Last-Modified.head !")
+	if not os.path.exists("data/"):
+		os.mkdir("data")
+	urllib.request.urlretrieve("https://datelazi.ro/latestData.json", "data/latestData.json")
+	with open('data/Last-Modified.head', 'w') as f:
+		f.write(http_response.headers['Last-Modified'])
+		f.close()
+	sys.exit("Fișierele latestData.json și Last-Modified.head au fost generate! Vă rugăm rulați programul din nou!")
 
 # latest is the json structure read from the latestData.json
 # latest_timestamp is a datetime object representing when the imported JSON was last updated
@@ -35,10 +44,8 @@ latest_timestamp = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
 day = datetime.timedelta(days = 1)
 
 
-# if the timestamp associated with the JSON file is older than 1 day - redownload the JSON file and exit
-# ToDo: do a head request at datelazi.ro/latestData.json and check the Last-Modified header
-
-http_response = requests.head("https://datelazi.ro/latestData.json")
+# if the locally stored timestamp of the JSON file does not match the timestamp
+# return by the HEAD request via the Last-Modified field, redownload the JSON file and exit
 if last_modified == http_response.headers['Last-Modified']:
 	print("Fișierul JSON este ultima variantă!")
 else:
