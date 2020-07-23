@@ -159,3 +159,5 @@ writer.writerow(csvfile_row)
 
 csvfile.close()
 
+# this is some stuff that I added to the end
+# in the DictWriter branch
