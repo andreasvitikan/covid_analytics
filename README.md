@@ -21,6 +21,8 @@ In this numbering scheme March 17th is `dayNumber` 1, March 18th is `dayNumber` 
 and if the local JSON file is out-of-date it will be automatically updated by the script. The output data will be
 placed in the `data/latestData.csv` file.
 
+If you just want to append the day's values to the already existing CSV file simply use the --append flag (```./parse.py --append```).
+
 #### Known issues
 
 1. The number of confirmed cases for the start date of the data (17-03-2020) is **NOT** the daily changes
