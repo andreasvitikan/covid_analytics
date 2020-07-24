@@ -52,7 +52,7 @@ with open('data/Last-Modified.head', 'r') as f:
 if last_modified == http_response.headers['Last-Modified']:
 	print("Fișierul JSON este ultima variantă!")
 else:
-	os.rename("data/latestData.json", "data/latestData.json.old.{}".format(datetime.date.today().strftime("%Y-%m-%d")))
+	os.rename("data/latestData.json", "data/latestData.json.old.{}".format((datetime.date.today() - day).strftime("%Y-%m-%d")))
 	urllib.request.urlretrieve(url_json, "data/latestData.json")
 	with open('data/Last-Modified.head', 'w') as f:
 		f.write(http_response.headers['Last-Modified'])
