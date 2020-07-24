@@ -21,7 +21,8 @@ In this numbering scheme March 17th is `dayNumber` 1, March 18th is `dayNumber` 
 and if the local JSON file is out-of-date it will be automatically updated by the script. The output data will be
 placed in the `data/latestData.csv` file.
 
-If you just want to append the day's values to the already existing CSV file simply use the --append flag (```./parse.py --append```).
+If you just want to append the day's values to the already existing CSV file simply use the --append flag.
+```./parse.py --append``` when calling the script, omitting the flag will default to CSV overwrite mode.
 
 #### Known issues
 
