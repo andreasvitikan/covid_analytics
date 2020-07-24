@@ -203,7 +203,10 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 #writer.writerow(csvfile_row)
 csvfile_rows.append(csvfile_row)
 
-for csvfile_row in csvfile_rows:
-	writer.writerow(csvfile_row)
+#for csvfile_row in csvfile_rows:
+#	writer.writerow(csvfile_row)
+
+for i in range(len(csvfile_rows) - 1, -1, -1):
+	writer.writerow(csvfile_rows[i])
 
 csvfile.close()
