@@ -56,6 +56,7 @@ else:
 	urllib.request.urlretrieve(url_json, "data/latestData.json")
 	with open('data/Last-Modified.head', 'w') as f:
 		f.write(http_response.headers['Last-Modified'])
+	print("Fișierul JSON a fost actualizat la ultima variantă: {}".format(http_response.headers['Last-Modified']))
 
 # At this point, the latestData.json file definitely exists
 # and is definitely the right version!
