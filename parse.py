@@ -8,6 +8,12 @@ import datetime
 import urllib.request
 import requests
 
+append_flag = False
+if len(sys.argv) > 1:
+	if sys.argv[1] == "--append":
+		append_flag = True
+		print("La fișierul CSV se va adaugă doar un rând ce corespunde zilei curente!")
+
 # Correct setting of the working directory in case the script
 # is not called from the directory where it is located
 real_path = os.path.realpath(__file__)
@@ -87,11 +93,6 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
 		csvfile_header.append("county{}".format(key))
 
-# Begin writing CSV file
-csvfile = open("data/latestData.csv", 'w', newline='')
-writer = csv.DictWriter(csvfile, csvfile_header)
-writer.writeheader()
-
 # Time to generate the actual values to be written in the CSV file
 # These will be generated in 3 blocks:
 # Block 1: the data for the present day which is based on currentDayStats ("today")
@@ -130,7 +131,6 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 		csvfile_row['county{}'.format(key)] = latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key]
 
 # Write the first row of values (second real row) to csv file
-#writer.writerow(csvfile_row)
 csvfile_rows.append(csvfile_row)
 
 # !-------!
@@ -172,7 +172,6 @@ while current_day > last_date:
 			if key.find("-") == -1:
 				csvfile_row["county{}".format(key)] = 0
 	
-	#writer.writerow(csvfile_row)
 	csvfile_rows.append(csvfile_row)
 	
 	current_day = current_day - day
@@ -200,13 +199,16 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
 		csvfile_row["county{}".format(key)] = 0
 
-#writer.writerow(csvfile_row)
 csvfile_rows.append(csvfile_row)
 
-#for csvfile_row in csvfile_rows:
-#	writer.writerow(csvfile_row)
-
-for i in range(len(csvfile_rows) - 1, -1, -1):
-	writer.writerow(csvfile_rows[i])
-
-csvfile.close()
+# Open the CSV file
+if not append_flag:
+	with open("data/latestData.csv", 'w', newline='') as csvfile:
+		writer = csv.DictWriter(csvfile, csvfile_header)
+		writer.writeheader()
+		for i in range(len(csvfile_rows) - 1, -1, -1):
+			writer.writerow(csvfile_rows[i])
+else:
+	with open("data/latestData.csv", 'a', newline='') as csvfile:
+		writer = csv.DictWriter(csvfile, csvfile_header)
+		writer.writerow(csvfile_rows[0])
