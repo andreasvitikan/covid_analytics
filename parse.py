@@ -21,6 +21,7 @@ root_values = ['numberInfected', 'numberCured', 'numberDeceased']
 last_date_county = datetime.date(2020, 4, 3)
 last_date = datetime.date(2020, 3, 17)
 last_modified = ""
+day = datetime.timedelta(days = 1)
 
 http_response = requests.head(url_json)
 
@@ -70,7 +71,6 @@ with open('data/latestData.json', 'r') as f:
 # day is a datetime interval representing 1 day (24 hours) that is frequently used
 
 latest_timestamp = datetime.date.fromtimestamp(latest['lasUpdatedOn'])
-day = datetime.timedelta(days = 1)
 
 # Generating the file header with all of the column names
 # The first 4 columns are hard-coded, the date is the key for the historicalData in the JSON file
@@ -101,6 +101,8 @@ writer.writeheader()
 # Block 3: Padding the last day in historicalData with wrong values so that the totals
 # are correct when summed to the present day
 
+csvfile_rows = []
+
 # !-------!
 # |Block 1|
 # !-------!
@@ -128,7 +130,8 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 		csvfile_row['county{}'.format(key)] = latest['currentDayStats']['countyInfectionsNumbers'][key] - latest['historicalData'][previous_day_string]['countyInfectionsNumbers'][key]
 
 # Write the first row of values (second real row) to csv file
-writer.writerow(csvfile_row)
+#writer.writerow(csvfile_row)
+csvfile_rows.append(csvfile_row)
 
 # !-------!
 # |Block 2|
@@ -169,7 +172,8 @@ while current_day > last_date:
 			if key.find("-") == -1:
 				csvfile_row["county{}".format(key)] = 0
 	
-	writer.writerow(csvfile_row)
+	#writer.writerow(csvfile_row)
+	csvfile_rows.append(csvfile_row)
 	
 	current_day = current_day - day
 
@@ -196,6 +200,10 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 	if key.find("-") == -1:
 		csvfile_row["county{}".format(key)] = 0
 
-writer.writerow(csvfile_row)
+#writer.writerow(csvfile_row)
+csvfile_rows.append(csvfile_row)
+
+for csvfile_row in csvfile_rows:
+	writer.writerow(csvfile_row)
 
 csvfile.close()
