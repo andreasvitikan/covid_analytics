@@ -202,6 +202,8 @@ for key in latest['currentDayStats']['countyInfectionsNumbers'].keys():
 csvfile_rows.append(csvfile_row)
 
 # Open the CSV file
+# if the append_flag is false, simply write the entire file
+# otherwise just use the DictWriter() method to append the latest row
 if not append_flag:
 	with open("data/latestData.csv", 'w', newline='') as csvfile:
 		writer = csv.DictWriter(csvfile, csvfile_header)
